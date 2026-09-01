@@ -79,14 +79,14 @@ pip install -e ".[dev]"
 import scanpy as sc
 import scstability as scs
 
-adata = sc.read_h5ad("my_data.h5ad")     # needs adata.obsm["X_pca"]
+adata = sc.read_h5ad("my_data.h5ad")  # needs adata.obsm["X_pca"]
 
 result = scs.stability_sweep(adata, resolutions=[0.2, 0.4, 0.8, 1.2, 1.6])
 
-print(result.summary())                   # one row per resolution
-print(result.recommend())                 # the resolution to use
-result.to_adata(adata)                    # scores into adata.obs
-scs.pl.stability_curve(result)            # the figure above
+print(result.summary())  # one row per resolution
+print(result.recommend())  # the resolution to use
+result.to_adata(adata)  # scores into adata.obs
+scs.pl.stability_curve(result)  # the figure above
 ```
 
 ```

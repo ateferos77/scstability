@@ -31,9 +31,9 @@ import scstability as scs
 import scanpy as sc
 import scstability as scs
 
-adata = sc.read_h5ad("my_data.h5ad")          # needs adata.obsm["X_pca"]
+adata = sc.read_h5ad("my_data.h5ad")  # needs adata.obsm["X_pca"]
 result = scs.stability_sweep(adata, [0.2, 0.4, 0.8, 1.2])
-result.summary()                               # one row per resolution
+result.summary()  # one row per resolution
 ```
 
 | Symbol | Kind | Use it when |
@@ -368,9 +368,7 @@ chosen = fine.recommend()
 **List the clusters you should not trust.**
 
 ```python
-weak = fine.cluster_stability.query(
-    "resolution == @chosen and jaccard_mean < 0.75"
-)
+weak = fine.cluster_stability.query("resolution == @chosen and jaccard_mean < 0.75")
 ```
 
 **Find where an unstable cluster goes** when it dissolves — usually it is a
