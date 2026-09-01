@@ -3,7 +3,7 @@
 **Which of your single-cell clusters survive resampling, and which dissolve?**
 
 [![Tests](https://github.com/ateferos77/scstability/actions/workflows/test.yml/badge.svg)](https://github.com/ateferos77/scstability/actions/workflows/test.yml)
-[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-green.svg)](LICENSE)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-green.svg)](https://github.com/ateferos77/scstability/blob/main/LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 Leiden will return clusters from pure noise, confidently. The silhouette score
@@ -15,7 +15,7 @@ the same cells?**
 It implements the cluster-wise Jaccard stability of **Hennig (2007)** over
 subsampled reclusterings. AnnData-first, scanpy-compatible, one function call.
 
-![Stability across resolutions on five genotype-labelled cell lines](docs/images/validation_5cl_curve.png)
+![Stability across resolutions on five genotype-labelled cell lines](https://raw.githubusercontent.com/ateferos77/scstability/main/docs/images/validation_5cl_curve.png)
 
 <sub>Five human cell lines mixed and sequenced together, each cell assigned to
 its line by SNP genotype (Tian et al., *Nature Methods* 2019). The package sees
@@ -30,12 +30,12 @@ stable at 0.980, with everything finer collapsing. See
 - [What it does](#what-it-does) · [Installation](#installation) · [Quick start](#quick-start)
 - [Reading the score](#reading-the-score): **read this before trusting a number**
 - [Does it work?](#does-it-work) · [Performance](#performance)
-- [API](#api), and the [full reference](docs/API.md)
+- [API](#api), and the [full reference](https://github.com/ateferos77/scstability/blob/main/docs/API.md)
 - [Prior art](#prior-art) · [Limitations](#limitations) · [Citing](#citing)
 
 Two executed notebooks carry the detail:
-**[usage walkthrough](examples/pbmc_walkthrough.ipynb)** on 11,000 real PBMCs,
-and **[the validation](benchmarks/validation.ipynb)**.
+**[usage walkthrough](https://github.com/ateferos77/scstability/blob/main/examples/pbmc_walkthrough.ipynb)** on 11,000 real PBMCs,
+and **[the validation](https://github.com/ateferos77/scstability/blob/main/benchmarks/validation.ipynb)**.
 
 ---
 
@@ -97,7 +97,7 @@ scs.pl.stability_curve(result)  # the figure above
 ```
 
 That is the whole interface. Every argument is documented in the
-**[API reference](docs/API.md)**.
+**[API reference](https://github.com/ateferos77/scstability/blob/main/docs/API.md)**.
 
 ---
 
@@ -143,7 +143,7 @@ alongside as distribution *shape*.
 
 ## Does it work?
 
-**[benchmarks/validation.ipynb](benchmarks/validation.ipynb)** is the evidence,
+**[benchmarks/validation.ipynb](https://github.com/ateferos77/scstability/blob/main/benchmarks/validation.ipynb)** is the evidence,
 executed, with every figure and table rendered, so it can be read without
 running anything.
 
@@ -200,7 +200,7 @@ scs.pl.stability_umap(adata, result, resolution, ax=None)
 scs.HENNIG_BANDS                        # the interpretation table, as data
 ```
 
-**[Full API reference](docs/API.md)**: every parameter, return value, error
+**[Full API reference](https://github.com/ateferos77/scstability/blob/main/docs/API.md)**: every parameter, return value, error
 and warning, with recipes.
 
 ---
@@ -240,7 +240,7 @@ something else:
 
 A fair objection from a strong paper, so we measured it against `ClustAssessPy`
 with identical clustering in both arms
-([notebook](benchmarks/validation.ipynb), section 4).
+([notebook](https://github.com/ateferos77/scstability/blob/main/benchmarks/validation.ipynb), section 4).
 
 **The objection is largely right.** At cluster level the two agree closely
 (Spearman +0.907), and zero of 73 clusters were seed-stable yet
@@ -343,4 +343,4 @@ with it.
 
 ## License
 
-BSD 3-Clause. See [LICENSE](LICENSE).
+BSD 3-Clause. See [LICENSE](https://github.com/ateferos77/scstability/blob/main/LICENSE).
