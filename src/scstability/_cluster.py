@@ -157,7 +157,7 @@ def effective_n_neighbors(n_neighbors: int, n_obs: int) -> int:
 
 
 def leiden_labels(
-    X: ArrayLike, *, resolution: float, n_neighbors: int, seed: int
+    X: ArrayLike, *, resolution: float, n_neighbors: int, seed: int | None
 ) -> NDArray[np.int64]:
     """Build a kNN graph on a coordinate matrix and run Leiden on it.
 

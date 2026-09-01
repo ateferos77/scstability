@@ -54,6 +54,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
+    "mypy",
     "pre-commit",
     "scikit-learn",  # make_blobs, only in the test fixtures
 ]

@@ -348,9 +348,12 @@ def _all_bootstraps(
             f"boot_labels must be 2-dimensional with shape (n_boot, n_obs), got "
             f"shape {boots.shape}"
         )
-    boots = _as_labels(boots.ravel(), "boot_labels").reshape(boots.shape)
+    # Keep the original shape: the checker cannot infer the rank of a reshaped
+    # array, and reading it back off `boots` after reassignment loses it.
+    shape = boots.shape
+    boots = _as_labels(boots.ravel(), "boot_labels").reshape(shape)
 
-    n_boot = boots.shape[0]
+    n_boot = int(shape[0])
     n_ref = np.unique(ref).size
     jaccard = np.empty((n_boot, n_ref), dtype=np.float64)
     best_match = np.empty((n_boot, n_ref), dtype=np.int64)

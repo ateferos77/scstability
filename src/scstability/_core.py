@@ -314,7 +314,7 @@ def _get_representation(adata: AnnData, use_rep: str) -> NDArray[np.floating]:
             f"preprocessing of its own -- compute a representation first, for "
             f"example with `sc.pp.pca(adata)`, which writes 'X_pca'."
         )
-    X = np.asarray(adata.obsm[use_rep])
+    X: NDArray[np.floating] = np.asarray(adata.obsm[use_rep])
     if X.ndim != 2 or X.shape[0] != adata.n_obs:
         raise ValueError(
             f"adata.obsm[{use_rep!r}] must have shape (n_obs, n_dims); got "

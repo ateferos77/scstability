@@ -21,6 +21,8 @@ No function here calls ``plt.show()``.
 
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.colors import LinearSegmentedColormap
@@ -99,7 +101,7 @@ def band_colour(value: float) -> str:
     return CRITICAL
 
 
-def _style(ax: Axes, *, grid_axis: str = "y") -> None:
+def _style(ax: Axes, *, grid_axis: Literal["both", "x", "y"] = "y") -> None:
     """Recessive chrome: hairline solid grid, two spines, muted ticks."""
     ax.set_facecolor(SURFACE)
     ax.grid(axis=grid_axis, color=GRID, linewidth=0.6, zorder=0)
@@ -375,6 +377,7 @@ def stability_curve(
     ax_count.set_xticklabels([f"{r:g}" for r in resolutions])
     _style(ax_count)
 
+    assert figure is not None  # ax was None, so we built one above
     return figure
 
 
