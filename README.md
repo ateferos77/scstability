@@ -123,6 +123,18 @@ beside a minimum of 0.18. The median hides exactly the cluster you needed.
 near 1.0 on structureless data, because the resample collapses the same way.
 `recommend()` guards against this; your own reading of `summary()` must too.
 
+**Do not over-read small differences in `min_cluster_stability`.** It is a
+minimum over clusters, so it is an extreme order statistic, driven by whichever
+cluster happens to be worst. Measured on the genotype-labelled data by varying
+only `random_state`: at a resolution where clusters are genuinely marginal, the
+standard deviation is around 0.09 and the observed range across ten seeds
+reached 0.33, which is wider than a whole interpretation band. Raising `n_boot`
+narrows it (0.096 to 0.069 going from 10 to 50, with the reference clustering
+held fixed) but does not remove it, because the reference partition itself
+shifts slightly with the seed. Where a cluster sits near a band edge, run the
+sweep under two or three seeds before drawing a conclusion, and read
+`jaccard_q25`/`jaccard_q75` rather than the point estimate alone.
+
 The bands apply to `jaccard_mean`. Bootstrap Jaccards are left-skewed, so the
 median runs optimistically; `jaccard_median` and the quartiles are reported
 alongside as distribution *shape*.
@@ -263,10 +275,13 @@ removes a cell.
    `n_clusters`.
 7. **Very small clusters are noisy.** Check `jaccard_q25`/`jaccard_q75`.
 8. **Per-cell scores saturate** on well-separated data.
-9. **Benchmarked against `ClustAssessPy` only.** `scICE` and `chooseR` have not
+9. **`min_cluster_stability` is noisy near band edges.** It is a minimum over
+   clusters, so its sampling variance is larger than any individual cluster's.
+   See [Reading the score](#reading-the-score).
+10. **Benchmarked against `ClustAssessPy` only.** `scICE` and `chooseR` have not
    been run, and no number for either appears in this repository. Correctness
-   is validated on 3,822 and 2,531 cells; scale is measured separately to
-   68,000. Those are different claims on different data.
+    is validated on 3,822 and 2,531 cells; scale is measured separately to
+    68,000. Those are different claims on different data.
 
 ---
 

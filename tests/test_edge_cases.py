@@ -212,23 +212,37 @@ def test_progress_bar_can_be_switched_off(blobs_adata, capsys):
 
 
 def test_anndata_normalises_a_one_dimensional_representation():
-    """A 1-D ``obsm`` entry becomes ``(n_obs, 1)``, so the sweep does not reject it.
+    """What a 1-D ``obsm`` entry does depends on the AnnData version.
 
-    Worth pinning because it is surprising, and because it is the reason the
-    shape guard in ``_get_representation`` is unreachable through the public
-    API: AnnData enforces the invariant on assignment, reshaping a flat array
-    rather than storing it. A caller who passes a 1-D array gets a single-column
-    representation and a real clustering of it, not an error.
+    Recent AnnData reshapes it to ``(n_obs, 1)`` on assignment, so the caller
+    gets a single-column representation and a real clustering of it rather than
+    an error -- and the shape guard in ``_get_representation`` is unreachable
+    through the public API. AnnData 0.10.0 stores it as-is, and the guard fires.
+
+    Both are acceptable; what must never happen is a silently wrong answer.
+    Asserted across both so the suite passes on the declared dependency floors
+    as well as on current releases.
     """
     adata = AnnData(np.zeros((10, 3), dtype=np.float32))
     adata.obsm["X_flat"] = np.zeros(10, dtype=np.float32)
 
-    assert np.asarray(adata.obsm["X_flat"]).shape == (10, 1)
-
-    result = scs.stability_sweep(
-        adata, [0.5], n_boot=2, use_rep="X_flat", progress=False
-    )
-    assert len(result.per_cell) == 10
+    stored = np.asarray(adata.obsm["X_flat"])
+    if stored.ndim == 2:
+        # Newer AnnData reshapes to (n_obs, 1), so the guard never fires and
+        # the array is clustered as a single column.
+        assert stored.shape == (10, 1)
+        result = scs.stability_sweep(
+            adata, [0.5], n_boot=2, use_rep="X_flat", progress=False
+        )
+        assert len(result.per_cell) == 10
+    else:
+        # Older AnnData (0.10.0) stores it as-is, and then the shape guard is
+        # reachable after all -- which is the case it exists for.
+        assert stored.shape == (10,)
+        with pytest.raises(ValueError, match="must have shape"):
+            scs.stability_sweep(
+                adata, [0.5], n_boot=2, use_rep="X_flat", progress=False
+            )
 
 
 def test_the_shape_guard_still_fires_when_the_invariant_is_bypassed():

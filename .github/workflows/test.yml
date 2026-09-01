@@ -34,9 +34,12 @@ jobs:
         os: [ubuntu-latest]
         python-version: ["3.12", "3.13"]
         include:
-          # One run on macOS, to catch anything that depends on the platform's
-          # BLAS or on igraph wheels rather than on our own code.
+          # One run on macOS and one on Windows, to catch anything that depends
+          # on the platform's BLAS, on igraph/leidenalg wheels, or on path
+          # handling, rather than on our own code.
           - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
             python-version: "3.12"
     steps:
       - uses: actions/checkout@v4

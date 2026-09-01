@@ -166,6 +166,11 @@ beside a minimum of 0.18 — the median hides exactly the cluster you needed.
 **Read `n_clusters` alongside the score.** A one-cluster partition scores near
 1.0 on structureless data, because the resample collapses the same way.
 
+**`min_cluster_stability` is a minimum, so it is noisy.** Varying only
+`random_state` on real data moved it by up to 0.33 across ten seeds at a
+resolution with marginal clusters. Raising `n_boot` narrows this but does not
+remove it. Near a band edge, run two or three seeds.
+
 Clusters unsampled in *every* replicate have `NaN` and are excluded rather than
 counted as zero. That means such a cluster does not drag the minimum down — only
 reachable at very low `n_boot` (probability `(1 - frac) ** n_boot`, so 4% at

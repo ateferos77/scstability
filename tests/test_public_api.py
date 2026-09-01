@@ -125,11 +125,17 @@ def test_importing_the_package_emits_no_warnings():
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
-            import scstability  # noqa: F401
+            import scstability
 
+        # Match the package's own directory, not the substring "scstability".
+        # A virtualenv is very often named after the package it holds, and a
+        # substring test then attributes every dependency's import warning to
+        # us -- matplotlib's pyparsing deprecations, for instance.
+        import os
+        package_dir = os.path.dirname(os.path.abspath(scstability.__file__))
         ours = [
             w for w in caught
-            if "scstability" in str(getattr(w, "filename", ""))
+            if os.path.abspath(str(getattr(w, "filename", ""))).startswith(package_dir)
         ]
         assert not ours, [str(w.message) for w in ours]
         print("ok")
