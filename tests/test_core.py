@@ -386,6 +386,62 @@ def test_recommend_raises_when_there_is_no_evidence_at_all():
         result.recommend()
 
 
+def test_recommend_raises_when_only_a_degenerate_resolution_has_evidence():
+    """The global no-evidence check is not enough on its own.
+
+    ``min_cluster_stability`` is not all-NaN here -- the single-cluster
+    resolution has evidence -- so the first guard passes. But that resolution
+    is then filtered out as degenerate, leaving an ``informative`` frame whose
+    column is entirely NaN, and ``idxmax`` on it raises pandas' opaque
+    "Encountered all NA values". A sentence is owed instead.
+
+    Not reachable through ``stability_sweep``: a subsample always draws at
+    least two cells, so at least one reference cluster always has evidence.
+    Constructed directly for the same reason the shape guard in
+    ``test_edge_cases.py`` is.
+    """
+    index = pd.Index([f"cell_{i}" for i in range(4)])
+    result = scs.StabilityResult(
+        resolutions=np.array([0.5, 1.0]),
+        cluster_stability=pd.DataFrame(
+            [
+                # the degenerate resolution, with evidence
+                {
+                    "resolution": 0.5,
+                    "cluster": 0,
+                    "n_cells": 4,
+                    "jaccard_mean": 1.0,
+                    "jaccard_median": 1.0,
+                    "jaccard_q25": 1.0,
+                    "jaccard_q75": 1.0,
+                },
+                # the informative resolution, with none
+                *(
+                    {
+                        "resolution": 1.0,
+                        "cluster": cluster,
+                        "n_cells": 2,
+                        "jaccard_mean": np.nan,
+                        "jaccard_median": np.nan,
+                        "jaccard_q25": np.nan,
+                        "jaccard_q75": np.nan,
+                    }
+                    for cluster in (0, 1)
+                ),
+            ]
+        ),
+        per_cell=pd.DataFrame({0.5: [1.0] * 4, 1.0: [np.nan] * 4}, index=index),
+        reference_labels=pd.DataFrame(
+            {0.5: pd.Categorical([0] * 4), 1.0: pd.Categorical([0, 0, 1, 1])},
+            index=index,
+        ),
+        params={},
+    )
+
+    with pytest.raises(ValueError, match="more than one cluster has any stability"):
+        result.recommend()
+
+
 def test_sweep_wiring_against_hand_computed_values(monkeypatch):
     """The whole sweep, with Leiden replaced by fixed partitions.
 

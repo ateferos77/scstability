@@ -21,17 +21,17 @@ subsampled reclusterings. AnnData-first, scanpy-compatible, one function call.
 its line by SNP genotype (Tian et al., *Nature Methods* 2019). The package sees
 only PCA coordinates, never the genotype, and finds the true five groups
 stable at 0.980, with everything finer collapsing. See
-[Does it work?](#does-it-work)</sub>
+[Does it work?](https://github.com/ateferos77/scstability#does-it-work)</sub>
 
 ---
 
 ## Contents
 
-- [What it does](#what-it-does) · [Installation](#installation) · [Quick start](#quick-start)
-- [Reading the score](#reading-the-score): **read this before trusting a number**
-- [Does it work?](#does-it-work) · [Performance](#performance)
-- [API](#api), and the [full reference](https://github.com/ateferos77/scstability/blob/main/docs/API.md)
-- [Prior art](#prior-art) · [Limitations](#limitations) · [Citing](#citing)
+- [What it does](https://github.com/ateferos77/scstability#what-it-does) · [Installation](https://github.com/ateferos77/scstability#installation) · [Quick start](https://github.com/ateferos77/scstability#quick-start)
+- [Reading the score](https://github.com/ateferos77/scstability#reading-the-score): **read this before trusting a number**
+- [Does it work?](https://github.com/ateferos77/scstability#does-it-work) · [Performance](https://github.com/ateferos77/scstability#performance)
+- [API](https://github.com/ateferos77/scstability#api), and the [full reference](https://github.com/ateferos77/scstability/blob/main/docs/API.md)
+- [Prior art](https://github.com/ateferos77/scstability#prior-art) · [Limitations](https://github.com/ateferos77/scstability#limitations) · [Citing](https://github.com/ateferos77/scstability#citing)
 
 Two executed notebooks carry the detail:
 **[usage walkthrough](https://github.com/ateferos77/scstability/blob/main/examples/pbmc_walkthrough.ipynb)** on 11,000 real PBMCs,
@@ -159,9 +159,9 @@ each cell assigned by **SNP genotype**.
 | tracks *set recovery*, not local purity | purity is 1.0 for **all** 73 clusters and cannot discriminate at all; stability separates them |
 | adds information over seed stability | seed adds **+0.000** R² once sampling is known; sampling adds **+0.056** over seed |
 
-Also: 125 tests plus 2 slow real-data tests, 98% coverage, a set-based oracle
-over 700 random configurations, mutation testing, and public-API tests that run
-in a clean subprocess.
+Also: 135 tests plus 2 slow real-data tests, 98% coverage, a set-based oracle
+over 700 random configurations, and public-API tests that run in a clean
+subprocess.
 
 ---
 
@@ -277,7 +277,7 @@ removes a cell.
 8. **Per-cell scores saturate** on well-separated data.
 9. **`min_cluster_stability` is noisy near band edges.** It is a minimum over
    clusters, so its sampling variance is larger than any individual cluster's.
-   See [Reading the score](#reading-the-score).
+   See [Reading the score](https://github.com/ateferos77/scstability#reading-the-score).
 10. **Benchmarked against `ClustAssessPy` only.** `scICE` and `chooseR` have not
    been run, and no number for either appears in this repository. Correctness
     is validated on 3,822 and 2,531 cells; scale is measured separately to

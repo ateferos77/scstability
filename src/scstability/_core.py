@@ -178,6 +178,12 @@ class StabilityResult:
         float
             A resolution from the grid.
 
+        Raises
+        ------
+        ValueError
+            If no resolution the recommendation could return has any stability
+            evidence at all -- every cluster unsampled in every bootstrap.
+
         Warns
         -----
         UserWarning
@@ -233,9 +239,21 @@ class StabilityResult:
         if len(qualifying):
             return float(qualifying["resolution"].max())
 
-        summary = informative
+        # The all-NaN check above is global, so it passes as long as *some*
+        # resolution has evidence -- including a degenerate one that was just
+        # filtered out. Every informative resolution can still be evidenceless,
+        # and `idxmax` would then raise pandas' opaque "Encountered all NA
+        # values" rather than the sentence the guard above exists to give.
+        evidenced = informative[informative["min_cluster_stability"].notna()]
+        if not len(evidenced):
+            raise ValueError(
+                "No resolution with more than one cluster has any stability "
+                "evidence: every cluster was unsampled in every bootstrap. "
+                "Raise n_boot or frac, or check that the input has enough "
+                "cells to subsample."
+            )
 
-        best = summary.loc[summary["min_cluster_stability"].idxmax()]
+        best = evidenced.loc[evidenced["min_cluster_stability"].idxmax()]
         warnings.warn(
             f"No resolution reached a minimum cluster stability of {threshold}. "
             f"The best available is resolution {best['resolution']:g} at "
@@ -397,8 +415,8 @@ def stability_sweep(
 
     Notes
     -----
-    The embedding is computed once and sliced, never recomputed per replicate.
-    See ``recompute_pca`` in the roadmap.
+    The embedding is computed once and sliced, never recomputed per replicate,
+    so instability of the embedding itself is out of scope for this measure.
 
     Examples
     --------

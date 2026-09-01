@@ -118,7 +118,7 @@ with 5 resolutions and 20 bootstraps: 10,000 cells in 60 s, 68,000 cells in
 
 ### `StabilityResult`
 
-A frozen dataclass. Construct it only by calling `stability_sweep`.
+A dataclass. Construct it only by calling `stability_sweep`.
 
 | Attribute | Type | Contents |
 |---|---|---|
@@ -189,7 +189,8 @@ Returns the **largest** resolution whose `min_cluster_stability` is at or above
 
 Resolutions producing a single cluster are never returned.
 
-Raises `ValueError` if no resolution has any evidence at all.
+Raises `ValueError` if no resolution the recommendation could return has any
+evidence at all.
 
 **Warns** (and still returns an answer) when:
 
@@ -223,7 +224,7 @@ Writes per-cell scores into `adata.obs`, in place.
 | Written | Contents |
 |---|---|
 | `adata.obs[f"{key_added}_res{r:g}"]` | Per-cell stability, one column per resolution. `float`, `NaN` = no evidence |
-| `adata.uns[key_added]` | The sweep parameters |
+| `adata.uns[key_added]` | `params` (the sweep arguments), `summary` and `cluster_stability`, both as DataFrames |
 
 `adata.obs_names` must match the object the sweep ran on. Warns before
 overwriting an existing column; the write still happens.

@@ -1,0 +1,32 @@
+# Build and packaging artefacts
+/dist/
+/build/
+*.egg-info/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Test and lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Environments
+.venv/
+venv/
+
+# Datasets the notebooks and benchmark scripts download on first run.
+# They are large, reproducible and never belong in the repository.
+/data/
+
+# Scratch worker written by benchmarks/scaling.py
+/benchmarks/_scaling_worker.py
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/

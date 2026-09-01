@@ -1,0 +1,10 @@
+# Normalise every text file to LF in the repository *and* in the working tree.
+#
+# Without this, a Windows checkout under core.autocrlf=true gets a CRLF working
+# tree, and `python -m build` then ships CRLF inside the sdist and wheel while a
+# Linux/CI build of the same commit ships LF. Pinning eol=lf makes the release
+# artefact identical wherever it is built.
+* text=auto eol=lf
+
+# Binary: never touch.
+*.png binary

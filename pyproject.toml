@@ -1,5 +1,7 @@
 [build-system]
-requires = ["hatchling"]
+# 1.27 is where hatchling grew PEP 639 support, which the SPDX `license`
+# string and `license-files` below both require.
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,7 +9,8 @@ name = "scstability"
 version = "0.1.0"
 description = "Bootstrap cluster stability for single-cell RNA-seq: which of your clusters survive resampling?"
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 authors = [{ name = "Atefe Rostami", email = "ateferos77@gmail.com" }]
 keywords = [
@@ -22,7 +25,6 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",

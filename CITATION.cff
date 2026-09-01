@@ -9,6 +9,9 @@ authors:
     given-names: Atefe
     email: ateferos77@gmail.com
 repository-code: "https://github.com/ateferos77/scstability"
+url: "https://pypi.org/project/scstability/"
+version: 0.1.0
+date-released: 2026-09-02
 license: BSD-3-Clause
 keywords:
   - single-cell

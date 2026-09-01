@@ -12,6 +12,11 @@ PBMC dataset, so the README can quote numbers rather than reassurances. Each
 size runs in a **separate process**, so one measurement cannot inherit another's
 allocator state or warmed caches.
 
+Runs on Linux, macOS and Windows. Peak memory comes from ``getrusage`` on the
+Unix platforms and from ``GetProcessMemoryInfo`` on Windows; the numbers quoted
+in the README were measured on Linux, and memory readings are not exactly
+comparable across operating systems.
+
 Usage
 -----
 ::
@@ -32,9 +37,63 @@ import textwrap
 SIZES = [2000, 5000, 10000, 20000, 40000, 68000]
 
 WORKER = """
-import json, resource, sys, time, warnings
+import json, sys, time, warnings
 import anndata as ad, numpy as np
 import scstability as scs
+
+
+def peak_memory_mib():
+    "Peak resident memory of this process, in MiB, on Linux, macOS or Windows."
+    if sys.platform == "win32":
+        # Windows has no `resource` module at all. PeakWorkingSetSize is the
+        # direct equivalent of ru_maxrss: a high-water mark, in bytes.
+        import ctypes
+        from ctypes import wintypes
+
+        class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
+            _fields_ = [
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        psapi = ctypes.WinDLL("psapi", use_last_error=True)
+        # The signatures must be declared. Left to ctypes' defaults the process
+        # handle is truncated to a C int and the call fails with ERROR_SUCCESS,
+        # which looks like a bug in the benchmark rather than in the binding.
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        kernel32.GetCurrentProcess.argtypes = []
+        psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+        psapi.GetProcessMemoryInfo.argtypes = [
+            wintypes.HANDLE,
+            ctypes.POINTER(PROCESS_MEMORY_COUNTERS),
+            wintypes.DWORD,
+        ]
+
+        counters = PROCESS_MEMORY_COUNTERS()
+        counters.cb = ctypes.sizeof(counters)
+        if not psapi.GetProcessMemoryInfo(
+            kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb
+        ):
+            raise ctypes.WinError(ctypes.get_last_error())
+        return counters.PeakWorkingSetSize / 1024**2
+
+    import resource
+
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    # ru_maxrss is KILOBYTES on Linux and BYTES on macOS. Dividing by 1024
+    # everywhere, as this script used to, understates macOS by a factor of
+    # 1024 -- silently, since the number still looks like a plausible reading.
+    return peak / 1024 if sys.platform.startswith("linux") else peak / 1024**2
+
 
 path, n_cells, n_boot, n_res = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
 full = ad.read_h5ad(path)
@@ -57,12 +116,11 @@ with warnings.catch_warnings():
     )
 elapsed = time.perf_counter() - start
 
-peak_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 summary = result.summary()
 print("@@" + json.dumps({
     "n_cells": n,
     "seconds": round(elapsed, 1),
-    "peak_mb": round(peak_kb / 1024, 1),
+    "peak_mb": round(peak_memory_mib(), 1),
     "n_clusters": [int(v) for v in summary["n_clusters"]],
     "min_stability": round(float(summary["min_cluster_stability"].max()), 3),
 }))
