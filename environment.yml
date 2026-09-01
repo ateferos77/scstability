@@ -1,0 +1,32 @@
+# Development environment for scstability.
+#
+# Create with:   conda env create -f environment.yml
+#                (or `micromamba create -f environment.yml` / `mamba env create -f environment.yml`)
+# Activate with: conda activate scstability
+# Then:          pip install -e ".[dev]"
+#
+# igraph and leidenalg are compiled C extensions; conda-forge is the reliable
+# source for them. Users installing the released package can use plain pip.
+name: scstability
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+
+  # runtime
+  - anndata
+  - scanpy
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib-base
+  - python-igraph
+  - leidenalg
+  - tqdm
+
+  # dev
+  - pytest
+  - pytest-cov
+  - ruff
+  - pre-commit
+  - pip

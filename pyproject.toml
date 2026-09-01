@@ -1,0 +1,166 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scstability"
+version = "0.1.0.dev0"
+description = "Bootstrap cluster stability for single-cell RNA-seq: which of your clusters survive resampling?"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+authors = [{ name = "Atefe Rostami", email = "ateferos77@gmail.com" }]
+keywords = [
+    "single-cell",
+    "scRNA-seq",
+    "clustering",
+    "stability",
+    "leiden",
+    "scanpy",
+    "bioinformatics",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Typing :: Typed",
+]
+# Floors, never ceilings. A library that caps an upper bound blocks every one of
+# its users the day the capped release lands, and can only unblock them with a
+# new release of its own. Reproducibility belongs in environment.yml, not here.
+#
+# The scanpy floor is not arbitrary: 1.10 is where `sc.tl.leiden(flavor="igraph")`
+# arrived, and the older leidenalg flavor is deprecated upstream.
+dependencies = [
+    "anndata>=0.10",
+    "scanpy>=1.10",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "igraph>=0.10",
+    "leidenalg>=0.9",
+    "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "pre-commit",
+    "scikit-learn",  # make_blobs, only in the test fixtures
+]
+# Release tooling, kept separate so `[dev]` stays quick to install.
+release = [
+    "build",
+    "twine",
+]
+# For re-executing the notebook in examples/.
+docs = [
+    "nbformat",
+    "nbconvert",
+    "ipykernel",
+]
+
+[project.urls]
+Homepage = "https://github.com/ateferos77/scstability"
+Source = "https://github.com/ateferos77/scstability"
+Issues = "https://github.com/ateferos77/scstability/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scstability"]
+
+# The sdist carries the evidence, not just the code: a reader who pip-downloads
+# the tarball can rerun the validation without cloning.
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/benchmarks",
+    "/examples",
+    "/docs",
+    "/README.md",
+    "/CITATION.cff",
+    "/LICENSE",
+    "/environment.yml",
+]
+
+# ---------------------------------------------------------------------------
+# pytest
+#
+# The `slow` marker is registered and deselected by default, so the routine
+# `pytest` run stays under the 60-second budget. Run the slow real-data test
+# explicitly with `pytest -m slow`; a command-line -m overrides the one in
+# addopts below.
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not slow' --strict-markers"
+markers = [
+    "slow: real-data tests, deselected by default (run with `pytest -m slow`)",
+]
+# Deliberately NO global `filterwarnings = ["error::RuntimeWarning"]` here.
+#
+# It sounds right -- numpy's "invalid value encountered in divide" is exactly the
+# sloppiness we care about -- but globally it also fails on RuntimeWarnings raised
+# inside scanpy/igraph, which we do not control. Scoping it to our own code does
+# not work either: the filter's module field matches the *filename stem*, not the
+# dotted import path, so it would have to read `:_metrics` -- and scanpy ships its
+# own `_metrics.py`. Worse, a mis-scoped filter fails silently: it matches nothing
+# and reports nothing, so you believe you are protected when you are not.
+#
+# Instead the strictness is applied locally, to our own calls only, via the
+# `strict_warnings` fixture in tests/conftest.py. Use it in every test whose point
+# is that a pathological input produces NaN rather than a warning.
+
+[tool.coverage.run]
+source = ["src/scstability"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
+
+# ---------------------------------------------------------------------------
+# ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "D",    # pydocstyle
+    "NPY",  # numpy-specific rules
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "D107",  # __init__ docstring lives on the class
+    "E501",  # line length is handled by the formatter
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+# Notebook cells are a narrative, not a module: the prose lives in the markdown
+# cells around them, and requiring a docstring on a four-line inline helper
+# makes the code worse to read. Everything else still applies.
+"*.ipynb" = ["D"]
+
+[tool.ruff.format]
+docstring-code-format = true

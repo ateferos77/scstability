@@ -1,0 +1,78 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.12", "3.13"]
+        include:
+          # One run on macOS, to catch anything that depends on the platform's
+          # BLAS or on igraph wheels rather than on our own code.
+          - os: macos-latest
+            python-version: "3.12"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # Installing from a clean checkout is itself the packaging test: if the
+      # metadata is wrong, this step fails before any test runs.
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Test
+        run: pytest -v --cov=scstability --cov-report=term-missing --cov-report=xml
+
+      # The docstring examples are user-facing documentation and were shipping
+      # unverified. Run separately rather than via addopts, so that collecting
+      # src/ does not interfere with the ordinary test run.
+      - name: Doctests
+        run: pytest --doctest-modules src/scstability -q
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+  build:
+    # A package that cannot be built cannot be published, so check it here
+    # rather than discovering it at release time.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - name: Check metadata renders on PyPI
+        run: twine check dist/*

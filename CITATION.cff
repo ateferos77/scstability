@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+title: "scstability: bootstrap cluster stability for single-cell RNA-seq"
+message: >-
+  If you use this software, please cite both the software and the
+  method it implements, which is Hennig (2007).
+type: software
+authors:
+  - family-names: Rostami
+    given-names: Atefe
+    email: ateferos77@gmail.com
+repository-code: "https://github.com/ateferos77/scstability"
+license: BSD-3-Clause
+keywords:
+  - single-cell
+  - scRNA-seq
+  - clustering
+  - stability
+  - leiden
+  - scanpy
+references:
+  - type: article
+    title: "Cluster-wise assessment of cluster stability"
+    authors:
+      - family-names: Hennig
+        given-names: Christian
+    journal: "Computational Statistics & Data Analysis"
+    volume: 52
+    issue: 1
+    start: 258
+    end: 271
+    year: 2007
+    doi: "10.1016/j.csda.2006.11.025"
