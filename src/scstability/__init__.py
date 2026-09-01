@@ -10,7 +10,7 @@ Hennig, C. (2007). Cluster-wise assessment of cluster stability.
 *Computational Statistics & Data Analysis*, 52(1), 258-271.
 """
 
-__version__ = "0.1.0.dev0"
+__version__ = "0.1.0"
 
 # _metrics and _cluster stay internal by design: they are the tested core, not
 # part of the user-facing surface. `pl` is imported eagerly so that

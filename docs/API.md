@@ -17,10 +17,10 @@ import scstability as scs
 ## Contents
 
 - [At a glance](#at-a-glance)
-- [Sweeping](#sweeping) — [`stability_sweep`](#stability_sweep)
-- [Reading the result](#reading-the-result) — [`StabilityResult`](#stabilityresult) · [`.summary`](#stabilityresultsummary) · [`.recommend`](#stabilityresultrecommend) · [`.to_adata`](#stabilityresultto_adata)
-- [Plotting](#plotting) — [`pl.stability_curve`](#plstability_curve) · [`pl.cluster_stability`](#plcluster_stability) · [`pl.stability_umap`](#plstability_umap)
-- [Constants](#constants) — [`HENNIG_BANDS`](#hennig_bands)
+- [Sweeping](#sweeping): [`stability_sweep`](#stability_sweep)
+- [Reading the result](#reading-the-result): [`StabilityResult`](#stabilityresult) · [`.summary`](#stabilityresultsummary) · [`.recommend`](#stabilityresultrecommend) · [`.to_adata`](#stabilityresultto_adata)
+- [Plotting](#plotting): [`pl.stability_curve`](#plstability_curve) · [`pl.cluster_stability`](#plcluster_stability) · [`pl.stability_umap`](#plstability_umap)
+- [Constants](#constants): [`HENNIG_BANDS`](#hennig_bands)
 - [Input requirements](#input-requirements) · [Errors](#errors) · [Recipes](#recipes)
 
 ---
@@ -40,7 +40,7 @@ result.summary()  # one row per resolution
 |---|---|---|
 | `stability_sweep` | function | **Start here.** Runs the whole measurement |
 | `StabilityResult` | dataclass | What the sweep returns |
-| `.summary()` | method | One row per resolution — read `min_cluster_stability` |
+| `.summary()` | method | One row per resolution; read `min_cluster_stability` |
 | `.recommend()` | method | You want one resolution chosen for you |
 | `.to_adata()` | method | You want the scores back in `adata.obs` |
 | `pl.stability_curve` | function | Choosing a resolution |
@@ -78,9 +78,9 @@ comes back together.
 
 | Parameter | Default | Meaning |
 |---|---|---|
-| `adata` | — | `AnnData` with a representation already in `obsm`. **No preprocessing is performed** — bring your own QC, normalisation and PCA |
-| `resolutions` | — | Leiden resolutions to sweep. Sorted ascending internally; must be positive and unique |
-| `n_boot` | `20` | Replicates per resolution. Minimum 2. Use 50–100 for a published figure |
+| `adata` | (required) | `AnnData` with a representation already in `obsm`. **No preprocessing is performed**, so bring your own QC, normalisation and PCA |
+| `resolutions` | (required) | Leiden resolutions to sweep. Sorted ascending internally; must be positive and unique |
+| `n_boot` | `20` | Replicates per resolution. Minimum 2. Use 50-100 for a published figure |
 | `frac` | `0.8` | Fraction of cells per replicate, **without replacement**. Must be in `(0, 1]` |
 | `use_rep` | `"X_pca"` | Key in `adata.obsm`. Sliced, never recomputed |
 | `n_neighbors` | `15` | Neighbours per cell, clamped down automatically for small subsamples |
@@ -91,7 +91,7 @@ Returns a [`StabilityResult`](#stabilityresult).
 
 **Cells are sampled without replacement, and this is deliberate.** Sampling
 *with* replacement places duplicate cells at distance zero from one another,
-which corrupts a kNN graph — every duplicate becomes its own nearest
+which corrupts a kNN graph: every duplicate becomes its own nearest
 neighbour. `chooseR` makes the same choice for the same reason.
 
 **The embedding is held fixed.** `use_rep` is sliced, never recomputed per
@@ -161,7 +161,7 @@ One row per resolution.
 
 **Read `min_cluster_stability`, not the median.** A resolution is only as
 trustworthy as its weakest cluster. Real data routinely shows a median of 0.94
-beside a minimum of 0.18 — the median hides exactly the cluster you needed.
+beside a minimum of 0.18. The median hides exactly the cluster you needed.
 
 **Read `n_clusters` alongside the score.** A one-cluster partition scores near
 1.0 on structureless data, because the resample collapses the same way.
@@ -172,7 +172,7 @@ resolution with marginal clusters. Raising `n_boot` narrows this but does not
 remove it. Near a band edge, run two or three seeds.
 
 Clusters unsampled in *every* replicate have `NaN` and are excluded rather than
-counted as zero. That means such a cluster does not drag the minimum down — only
+counted as zero. That means such a cluster does not drag the minimum down, and is only
 reachable at very low `n_boot` (probability `(1 - frac) ** n_boot`, so 4% at
 `n_boot=2` but 1e-14 at `n_boot=20`).
 
@@ -185,7 +185,7 @@ recommend(threshold=0.75) -> float
 ```
 
 Returns the **largest** resolution whose `min_cluster_stability` is at or above
-`threshold` — the most granularity available while every cluster still holds.
+`threshold`, which is the most granularity available while every cluster still holds.
 
 Resolutions producing a single cluster are never returned.
 
@@ -193,8 +193,8 @@ Raises `ValueError` if no resolution has any evidence at all.
 
 **Warns** (and still returns an answer) when:
 
-- no resolution meets `threshold` — the best available is returned, flagged;
-- every resolution yields one cluster — the scores are trivially perfect.
+- no resolution meets `threshold`, in which case the best available is returned, flagged;
+- every resolution yields one cluster, so the scores are trivially perfect.
 
 ```python
 import warnings
@@ -254,7 +254,7 @@ Every cluster at every resolution, with the Hennig bands shaded and a black
 line following the weakest cluster. **Use it to choose a resolution.**
 
 Returns a two-panel `Figure` (stability above, cluster count below), or the
-`Axes` you passed — in which case the count panel is omitted.
+`Axes` you passed, in which case the count panel is omitted.
 
 The count is a separate panel rather than a second y-axis. Two y-scales let a
 reader draw whatever relationship they came for, since the crossing point is an
@@ -275,8 +275,8 @@ find which cluster to distrust.**
 `resolution` must be in the grid.
 
 The IQR is drawn at its absolute position, not as an offset from the bar, so a
-mean lying below q25 — a cluster that usually reassembles and occasionally
-shatters — is visible rather than clipped away.
+mean lying below q25, which marks a cluster that usually reassembles and
+occasionally shatters, is visible rather than clipped away.
 
 ---
 
@@ -287,7 +287,7 @@ pl.stability_umap(adata, result, resolution, ax=None) -> Axes
 ```
 
 Your UMAP coloured by per-cell stability, with `NaN` cells in grey and their
-own legend entry. **Use it to see where the instability sits** — typically at
+own legend entry. **Use it to see where the instability sits**, typically at
 the boundaries between clusters, with the cores solid.
 
 Requires `adata.obsm["X_umap"]` and matching `obs_names`.
@@ -345,7 +345,7 @@ A one-dimensional array assigned to `obsm` is reshaped by AnnData to
 | Condition | Raised |
 |---|---|
 | `resolutions` empty, non-positive or duplicated | `ValueError` |
-| Two resolutions that collide as `res{r:g}` column names | `ValueError` — use a coarser grid |
+| Two resolutions that collide as `res{r:g}` column names | `ValueError`; use a coarser grid |
 | `n_boot < 2` | `ValueError` |
 | `frac` outside `(0, 1]` | `ValueError` |
 | `use_rep` missing from `obsm` | `ValueError`, listing the available keys |
@@ -376,7 +376,7 @@ chosen = fine.recommend()
 weak = fine.cluster_stability.query("resolution == @chosen and jaccard_mean < 0.75")
 ```
 
-**Find where an unstable cluster goes** when it dissolves — usually it is a
+**Find where an unstable cluster goes** when it dissolves. Usually it is a
 subdivision of a stable parent, not a population that resampling misses.
 
 ```python
@@ -391,6 +391,6 @@ silently compares unrelated clusters.
 
 **Reproducibility.** With the same `random_state` and the same `obsm`
 representation, results are identical. What varies across machines is the
-*upstream* PCA — ARPACK is iterative, and a SciPy patch release can move
+*upstream* PCA: ARPACK is iterative, and a SciPy patch release can move
 coordinates enough to shift a score in the third decimal. Pin your embedding,
 not just your seed.

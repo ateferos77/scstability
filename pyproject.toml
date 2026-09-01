@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scstability"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Bootstrap cluster stability for single-cell RNA-seq: which of your clusters survive resampling?"
 readme = "README.md"
 license = { file = "LICENSE" }
