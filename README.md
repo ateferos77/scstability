@@ -2,9 +2,10 @@
 
 **Which of your single-cell clusters survive resampling, and which dissolve?**
 
+[![PyPI](https://img.shields.io/pypi/v/scstability.svg?color=blue)](https://pypi.org/project/scstability/)
+[![Python](https://img.shields.io/pypi/pyversions/scstability.svg)](https://pypi.org/project/scstability/)
 [![Tests](https://github.com/ateferos77/scstability/actions/workflows/test.yml/badge.svg)](https://github.com/ateferos77/scstability/actions/workflows/test.yml)
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-green.svg)](https://github.com/ateferos77/scstability/blob/main/LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 Leiden will return clusters from pure noise, confidently. The silhouette score
 will not save you: it rewards compactness, which a slice carved out of a
@@ -64,6 +65,9 @@ pip install scstability
 ```
 
 Requires Python 3.12+ and scanpy 1.10+.
+Released on PyPI: **[pypi.org/project/scstability](https://pypi.org/project/scstability/)**
+
+From source, for development:
 
 ```bash
 git clone https://github.com/ateferos77/scstability
